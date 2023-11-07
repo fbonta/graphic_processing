@@ -1,77 +1,106 @@
-#define GLEW_STATIC
+//
+//  main.cpp
+//  Lab1
+//
+//  Copyright © 2017 CGIS. All rights reserved.
+//
 
-#include "Windows.h"
-
-// enable optimus!
-extern "C" {
-	_declspec(dllexport) DWORD NvOptimusEnablement = 1;
-	_declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
-}
-
+#include <conio.h>
 #include <iostream>
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
 
-int glWindowWidth = 640;
-int glWindowHeight = 480;
+#include "glm/glm.hpp"
+#include "glm/ext.hpp"
 
-GLFWwindow* glWindow = NULL;
+#include "GPSLab1.hpp"
 
-bool initOpenGLWindow()
+void TestTransformPoint()
 {
-	if (!glfwInit()) {
-		fprintf(stderr, "ERROR: could not start GLFW3\n");
-		return false;
-	}
+	glm::vec4 correctResult(3.0f, -1.0f, 1.0f, 1.0f);
 
-	glWindow = glfwCreateWindow(glWindowWidth, glWindowHeight, "Hello Window", NULL, NULL);
-	if (!glWindow) {
-		fprintf(stderr, "ERROR: could not open window with GLFW3\n");
-		glfwTerminate();
-		return false;
-	}
+	glm::vec4 result = gps::TransformPoint(glm::vec4(1.0f, 1.0f, 0.0f, 1.0f));
 
-	glfwMakeContextCurrent(glWindow);
-
-	// start GLEW extension handler
-	glewExperimental = GL_TRUE;
-	glewInit();
-
-	// get version info
-	const GLubyte* renderer = glGetString(GL_RENDERER); // get renderer string
-	const GLubyte* version = glGetString(GL_VERSION); // version as a string
-	printf("Renderer: %s\n", renderer);
-	printf("OpenGL version supported %s\n", version);
-
-	return true;
+	std::cout << "Test TransformPoint()" << std::endl;
+	std::cout << "  correct result: " << correctResult.x <<" "<< correctResult.y << " " << correctResult.z<< " " << correctResult.w << std::endl;
+	std::cout << "  your result:    " << result.x <<" " << result.y << " " << result.z << " " << result.w << " " << std::endl << std::endl;
 }
 
-void processEvents() {
-	if (glfwGetKey(glWindow, GLFW_KEY_A)) {
-		//TODO
-		std::cout << "PRESSED KEY A" << "\n";
-	}
+void TestComputeAngle()
+{
+	glm::vec3 v1(2.0f, 1.0f, 0.0f);
+	glm::vec3 v2(0.0f, 2.0f, 1.0f);
+
+	float angle = gps::ComputeAngle(v1, v2);
+
+	std::cout << "Test ComputeAngle()" << std::endl;
+	std::cout << "  correct result: " << "66.4218" << std::endl;
+	std::cout << "  your result:    " << angle << std::endl << std::endl;
 }
 
-void renderScene() {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0, 0, 1, 1.0);
+void TestIsConvex()
+{
+	glm::vec2 v1(0.0f, 0.0f);
+	glm::vec2 v2(1.0f, 0.0f);
+	glm::vec2 v3(0.5f, 0.5f);
+	glm::vec2 v4(1.0f, 1.0f);
+	glm::vec2 v5(0.0f, 1.0f);
+
+	std::vector<glm::vec2> vertices;
+	vertices.push_back(v1);
+	vertices.push_back(v2);
+	vertices.push_back(v3);
+	vertices.push_back(v4);
+	vertices.push_back(v5);
+
+	std::cout << "Test IsConvex()" << std::endl;
+	std::cout << "  correct result: " << "false" << std::endl;
+	std::cout << "  your result:    " << std::boolalpha << gps::IsConvex(vertices) << std::endl << std::endl;
 }
 
-int main(int argc, const char* argv[]) {
+void TestComputeNormals()
+{
+	glm::vec2 v1(0.0f, 0.0f);
+	glm::vec2 v2(2.0f, 0.0f);
+	glm::vec2 v3(2.0f, 2.0f);
+	glm::vec2 v4(0.0f, 2.0f);
 
-	initOpenGLWindow();
+	std::vector<glm::vec2> vertices;
+	vertices.push_back(v1);
+	vertices.push_back(v2);
+	vertices.push_back(v3);
+	vertices.push_back(v4);
 
-	while (!glfwWindowShouldClose(glWindow)) {
+	std::vector<glm::vec2> result = gps::ComputeNormals(vertices);
 
-		renderScene();
-		processEvents();
+	glm::vec2 n1(0.0f, -1.0f);
+	glm::vec2 n2(1.0f, 0.0f);
+	glm::vec2 n3(0.0f, 1.0f);
+	glm::vec2 n4(-1.0f, 0.0f);
 
-		glfwPollEvents();
-		glfwSwapBuffers(glWindow);
-	}
-	//close GL context and any other GLFW resources
-	glfwTerminate();
+	std::vector<glm::vec2> correctResult;
+	correctResult.push_back(n1);
+	correctResult.push_back(n2);
+	correctResult.push_back(n3);
+	correctResult.push_back(n4);
 
+	std::cout << "Test ComputeNormals()" << std::endl;
+	std::cout << "  correct result: " << std::endl;
+	for (auto normal : correctResult)
+		std::cout << "      " << normal.x <<" "<< normal.y << std::endl;
+	std::cout << std::endl;
+
+	std::cout << "  your result:    " << std::endl;
+	for (auto normal : result)
+		std::cout << "      " << normal.x <<" "<< normal.y << std::endl;
+	std::cout << std::endl;
+}
+
+int main(int argc, const char * argv[]) {
+
+	TestTransformPoint();
+	TestComputeAngle();
+	TestIsConvex();
+	TestComputeNormals();
+
+	_getch();
 	return 0;
 }
