@@ -1,7 +1,15 @@
-#version 410 core
+#version 400
 
-layout(location = 0) in vec3 vertex_position;
+layout(location = 0) in vec3 vertexPosition;
+layout(location = 1) in vec3 vertexColour;
+
+in vec4 aux;
+
+uniform vec3 transform_vector;
+
+out vec3 colour;
 
 void main() {
-    gl_Position = vec4(vertex_position, 1.0);
+    colour = vertexColour;
+    gl_Position = vec4(vertexPosition + transform_vector, 1.0);
 }
